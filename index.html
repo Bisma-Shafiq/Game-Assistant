@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            margin: 0;
+            background: #0a0a0a;
+            color: #FFD600;
+            font-family: sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        canvas {
+            border: 2px solid #FFD600;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+        }
+
+        .btn {
+            pointer-events: auto;
+            padding: 10px 20px;
+            border: 2px solid #FFD600;
+            color: #FFD600;
+            background: transparent;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ui">
+        <h1 id="title">Echoes of Entropy</h1>
+        <div id="hud">Level: 1 | Score: 0</div>
+        <button id="startBtn" class="btn">TAP TO START</button>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const hud = document.getElementById('hud');
+        const startBtn = document.getElementById('startBtn');
+        canvas.width = 800; canvas.height = 600;
+
+        let state = { level: 1, score: 0, screen: 'start', objects: [], player: { x: 50, y: 500, vx: 0, vy: 0 }, dragging: false, startPos: null };
+
+        function initLevel(lvl) {
+            state.objects = [];
+            if (lvl === 1) state.objects.push({ x: 600, y: 550, w: 50, h: 50, type: 'goal' }, { x: 100, y: 550, w: 40, h: 40, type: 'box' });
+            if (lvl === 2) state.objects.push({ x: 600, y: 550, w: 100, h: 20, type: 'goal' }, { x: 200, y: 500, w: 30, h: 30, type: 'box' }, { x: 250, y: 500, w: 30, h: 30, type: 'box' });
+            if (lvl === 3) state.objects.push({ x: 400, y: 200, w: 100, h: 10, type: 'platform', vy: 2 }, { x: 400, y: 580, w: 50, h: 20, type: 'goal' });
+        }
+
+        function draw() {
+            ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#FFD600';
+            state.objects.forEach(o => {
+                ctx.fillStyle = o.type === 'goal' ? 'rgba(255,214,0,0.3)' : '#FFD600';
+                ctx.fillRect(o.x, o.y, o.w, o.h);
+            });
+            if (state.dragging) {
+                ctx.beginPath(); ctx.moveTo(state.startPos.x, state.startPos.y); ctx.lineTo(state.mouse.x, state.mouse.y); ctx.stroke();
+            }
+        }
+
+        function update() {
+            if (state.screen !== 'play') return;
+            state.objects.forEach(o => {
+                if (o.type === 'platform') { o.y += o.vy; if (o.y < 100 || o.y > 500) o.vy *= -1; }
+                if (o.type === 'box' && o.x > 750) { state.level++; if (state.level > 3) state.screen = 'win'; else initLevel(state.level); }
+            });
+            draw();
+            requestAnimationFrame(update);
+        }
+
+        canvas.onmousedown = (e) => { state.dragging = true; state.startPos = { x: e.offsetX, y: e.offsetY }; state.mouse = { x: e.offsetX, y: e.offsetY }; };
+        canvas.onmousemove = (e) => { state.mouse = { x: e.offsetX, y: e.offsetY }; };
+        canvas.onmouseup = (e) => {
+            state.dragging = false;
+            state.objects.forEach(o => { if (o.type === 'box') { o.x += (e.offsetX - state.startPos.x) / 10; o.y += (e.offsetY - state.startPos.y) / 10; } });
+        };
+
+        startBtn.onclick = () => { state.screen = 'play'; initLevel(1); update(); startBtn.style.display = 'none'; };
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+google-generativeai
+google-genai
+pydantic
+reportlab
+python-multipart
+httpx
+google-adk
+tavily-python
+anthropic
