@@ -10,3 +10,5 @@ httpx
 google-adk
 tavily-python
 anthropic
+apify-client
+
