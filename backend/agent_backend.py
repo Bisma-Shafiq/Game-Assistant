@@ -5,7 +5,7 @@ import httpx
 from urllib.parse import urlencode
 from dotenv import load_dotenv
 
-import google.generativeai as genai
+import google.genai as genai
 
 from prompts import (
     MECHANICS_PROMPT, BALANCE_PROMPT, COMPETITOR_PROMPT, SYNTHESIS_PROMPT,
