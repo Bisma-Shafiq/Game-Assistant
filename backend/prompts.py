@@ -179,45 +179,64 @@ Rules:
 """
 
 SOCIAL_TRENDS_PROMPT = """
-You are a senior mobile game marketing analyst. You are provided with RAW DATA from TikTok, YouTube, and Facebook Ads.
+You are a senior mobile game marketing analyst. Your job is to analyze ONLY content directly relevant to the game described below.
 
-CRITICAL TASK: 
-You will receive a mix of scraped data. You must IGNORE any videos or ads that are not related to puzzle games or snakes (e.g., ignore toothbrushes, solar, or channel tutorials). 
-Base your analysis ONLY on the gameplay and creative styles of the puzzle-related videos found in the {data}
-INPUTS:
-- Genre: {genre}
-- Proposed Title: {game_title}
-- Source Data: {data}
+=== GAME CONTEXT ===
+Genre: {genre}
+Proposed Title: {game_title}
 
-Schema:
-{
+=== STEP 1: FILTER (Do this before anything else) ===
+Go through each item in the raw data below. For each item, ask:
+  - Does this video/ad show gameplay, mechanics, or themes related to "{genre}" or "{game_title}"?
+  - If NO → discard it completely. Do not reference it anywhere in your output.
+  - If YES → keep it for analysis.
+
+Discard examples: toothbrush ads, solar panel ads, channel tutorials, cooking content, fitness videos.
+Keep examples: puzzle gameplay, snake mechanics, brain teaser challenges, level-completion content.
+
+If fewer than 3 relevant items remain after filtering, return:
+{{"error": "Insufficient relevant data", "kept_items": <count>, "discarded_items": <count>}}
+
+=== STEP 2: ANALYZE (Only on kept items) ===
+Using ONLY the filtered content, produce the following JSON:
+
+{{
+  "filter_summary": {{
+    "total_items_received": <int>,
+    "items_kept": <int>,
+    "items_discarded": <int>,
+    "discard_reasons": ["brief reason per discarded batch, e.g. '3 solar ads', '1 toothbrush video'"]
+  }},
   "overall_buzz": "Low|Medium|High|Viral",
-  "buzz_summary": "2 sentences on social momentum specifically based on the provided data.",
-  "top_themes": ["3-5 themes found DIRECTLY in the video descriptions/titles provided"],
+  "buzz_summary": "2 sentences on social momentum based ONLY on kept items.",
+  "top_themes": ["3-5 themes found DIRECTLY in kept video titles/descriptions"],
   "best_platform": "TikTok|YouTube|Facebook Ads",
-  "best_platform_reason": "Specific reason why this platform's content in the {data} performs better (e.g. higher engagement ratios).",
-  "platform_analysis": {
-    "TikTok": "Analysis of the specific TikTok videos provided.",
-    "YouTube": "Analysis of the specific YouTube results provided.",
-    "Facebook_Ads": "Analysis of the specific ad creatives provided."
-  },
+  "best_platform_reason": "Cite specific engagement metrics or signals from the kept data.",
+  "platform_analysis": {{
+    "TikTok": "Analysis of kept TikTok videos only. If none kept, write 'No relevant TikTok content found.'",
+    "YouTube": "Analysis of kept YouTube videos only. If none kept, write 'No relevant YouTube content found.'",
+    "Facebook_Ads": "Analysis of kept Facebook ads only. If none kept, write 'No relevant Facebook Ads found.'"
+  }},
   "creative_directions": [
-    {
+    {{
       "direction": "Name of the angle",
-      "rationale": "Why this works based on {data}",
+      "rationale": "Why this works based on kept data only",
       "platform_source": "TikTok|YouTube|Facebook Ads",
-      "evidence": "Reference a specific video title or ID from the {data} that proves this works"
-    }
+      "evidence": "REQUIRED: Exact video title or creator name from the kept data"
+    }}
   ],
-  "hook_ideas": ["3-4 punchy hooks inspired by the top-performing content in the data"],
-  "recommended_hashtags": ["5-8 tags actually seen in the data"]
-}
+  "hook_ideas": ["3-4 punchy hooks inspired by top-performing KEPT content only"],
+  "recommended_hashtags": ["5-8 hashtags actually seen in the kept data"]
+}}
 
-RULES:
-1. "evidence" field in creative_directions MUST mention a specific video title or creator from the input {data}.
-2. If {data} is empty or insufficient, state "Insufficient Data" in the summary rather than making up trends.
-3. Apply weight to Facebook Ads for conversion potential and TikTok for top-of-funnel awareness.
-4. Return ONLY valid JSON.
+=== RAW DATA ===
+{data}
+
+=== STRICT RULES ===
+- NEVER reference a discarded item anywhere in Step 2 output.
+- The "evidence" field must quote an exact title or creator from the kept data. No paraphrasing.
+- Do not invent trends, hashtags, or video titles not present in the kept data.
+- Return ONLY valid JSON. No markdown, no explanation outside the JSON.
 """
 
 GAME_CODE_PROMPT = """
