@@ -1,4 +1,4 @@
-const BASE = "https://ai-game-assistant.up.railway.app";
+const BASE = import.meta.env.VITE_API_URL || "http://localhost:8080";
 async function post(endpoint, body) {
   const res = await fetch(`${BASE}${endpoint}`, {
     method: "POST",
