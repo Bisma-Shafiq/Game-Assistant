@@ -53,8 +53,8 @@ export default function HomePage({ onSubmit, error }) {
           <span>full design report</span>
         </h1>
         <p className="home-sub">
-          Three AI agents analyze your mechanics, balance risks, and competitor
-          landscape in parallel — full dashboard report in ~15 seconds.
+          Three AI agents analyze your mechanics, balance risks, competitor and IP check
+          landscape in parallel — full dashboard report in ~30 seconds.
         </p>
 
         <div className="home-card">
@@ -74,7 +74,7 @@ export default function HomePage({ onSubmit, error }) {
             <button className="btn btn-primary" onClick={submit} style={{ padding: "11px 28px", fontSize: 15 }}>
               Analyze with AI →
             </button>
-            <span style={{ fontSize: 13, color: "#444" }}>~15 sec · Ctrl+Enter</span>
+            <span style={{ fontSize: 13, color: "#444" }}>~30 sec · Ctrl+Enter</span>
           </div>
         </div>
 
