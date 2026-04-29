@@ -15,6 +15,7 @@ from prompts import (
     SOCIAL_TRENDS_PROMPT, IP_SAFETY_PROMPT,
 )
 
+
 load_dotenv()
 
 GEMINI_KEY = os.getenv("GEMINI_API_KEY", "")
